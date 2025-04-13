@@ -1,8 +1,23 @@
+/* Body and font */
 body {
-    background-color: #f0f2f5;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
+/* Fullscreen video background */
+.bg-video {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+/* Centered container */
 .centered {
     display: flex;
     justify-content: center;
@@ -10,35 +25,60 @@ body {
     height: 100vh;
 }
 
-.card {
-    background-color: white;
+/* Card styling */
+.card, .login-card {
+    background: rgba(255, 255, 255, 0.92);
     padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    width: 350px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
     text-align: center;
 }
 
+/* Inputs and buttons */
 input, textarea, button {
-    width: 90%;
-    padding: 10px;
+    width: 100%;
+    padding: 12px;
     margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
 }
 
-button {
-    background-color: #4CAF50;
+/* Gradient button style */
+.btn-gradient {
+    background: linear-gradient(to right, #007bff, #00c6ff);
     color: white;
+    border: none;
     font-weight: bold;
-    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-button:hover {
-    background-color: #45a049;
+.btn-gradient:hover {
+    background: linear-gradient(to right, #0056b3, #0099cc);
 }
 
+/* Error message */
 .error {
     color: red;
     font-weight: bold;
+}
+
+/* Logo */
+.logo {
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+/* Mobile tweaks */
+@media (max-width: 576px) {
+    .login-card {
+        padding: 20px;
+        border-radius: 15px;
+    }
+
+    input, textarea, button {
+        font-size: 0.95rem;
+    }
 }
