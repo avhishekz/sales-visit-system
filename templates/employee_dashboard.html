@@ -2,95 +2,157 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Employee Dashboard</title>
+    <title>Professional Employee Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
-            background: #f0f4f8;
             margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px 40px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            border-radius: 12px;
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 30px;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right, #e8edf3, #d9e3ec);
             color: #333;
         }
-        label {
-            font-weight: 600;
-            display: block;
-            margin-bottom: 5px;
-            margin-top: 20px;
+        .navbar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #004080;
+            padding: 15px 0;
+            color: white;
         }
-        input[type="text"], input[type="date"], textarea, select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #ccc;
+        .navbar div {
+            cursor: pointer;
+            padding: 10px 20px;
+            transition: background 0.3s;
+        }
+        .navbar div:hover {
+            background-color: #002f63;
             border-radius: 8px;
-            box-sizing: border-box;
-            margin-top: 5px;
+        }
+        .content {
+            padding: 40px;
+            display: none;
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            animation: fadeIn 0.6s ease;
+        }
+        .active-tab {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        label, input, select, textarea, button {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+        }
+        input, select, textarea {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background-color: #f8f9fa;
         }
         button {
-            margin-top: 30px;
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            border: none;
+            background-color: #004080;
             color: white;
-            font-size: 16px;
-            border-radius: 8px;
+            border: none;
+            padding: 14px;
+            margin-top: 25px;
+            border-radius: 10px;
+            font-weight: bold;
             cursor: pointer;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #002f63;
+        }
+        img.banner {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 30px;
         }
         .logout {
             text-align: center;
-            margin-top: 25px;
+            margin: 20px;
         }
         .logout a {
-            color: #555;
+            color: #004080;
             text-decoration: none;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Welcome, {{ name|capitalize }}</h2>
-        <form method="POST" action="{{ url_for('log_visit_form') }}">
-            <label for="client">Client Name:</label>
-            <input type="text" name="client" id="client" required>
-
-            <label for="date">Date of Visit:</label>
-            <input type="date" name="date" id="date" required>
-
-            <label for="session">Session:</label>
-            <select name="session" id="session" required>
-                <option value="" disabled selected>Select Session</option>
-                <option value="Morning">Morning</option>
-                <option value="Evening">Evening</option>
-            </select>
-
-            <label for="status">Status:</label>
-            <input type="text" name="status" id="status" required>
-
-            <label for="remarks">Remarks:</label>
-            <textarea name="remarks" id="remarks" rows="4" required></textarea>
-
-            <button type="submit">Submit Report</button>
-        </form>
-        <div class="logout">
-            <a href="{{ url_for('logout') }}">Logout</a>
-        </div>
+    <div class="navbar">
+        <div onclick="showTab('issue')"><i class="fas fa-tools"></i> Raise a Service Issue</div>
+        <div onclick="showTab('chat')"><i class="fas fa-robot"></i> Chat with AI</div>
+        <div onclick="showTab('track')"><i class="fas fa-map-marker-alt"></i> Track Sales Record</div>
+        <div onclick="showTab('form')"><i class="fas fa-pen"></i> Fill Sales Details</div>
     </div>
+
+    <div id="issue" class="content active-tab">
+        <img class="banner" src="https://source.unsplash.com/900x300/?support,customer" alt="Service Support">
+        <h2>Raise a Service Issue</h2>
+        <textarea placeholder="Describe the issue in detail..."></textarea>
+        <button>Submit Issue</button>
+    </div>
+
+    <div id="chat" class="content">
+        <img class="banner" src="https://source.unsplash.com/900x300/?ai,technology" alt="AI Chat">
+        <h2>Chat with AI Assistant</h2>
+        <textarea placeholder="Ask something... e.g., How to access CRM?"></textarea>
+        <button>Start Chat</button>
+    </div>
+
+    <div id="track" class="content">
+        <img class="banner" src="https://source.unsplash.com/900x300/?gps,location" alt="Track Sales">
+        <h2>Track Sales Record</h2>
+        <form>
+            <label>Enter Date to Find Record:</label>
+            <input type="date" placeholder="Enter Date to Track Record" required>
+            <button>Search</button>
+        </form>
+    </div>
+
+    <div id="form" class="content">
+        <img class="banner" src="https://source.unsplash.com/900x300/?business,teamwork" alt="Sales Form">
+        <h2>Fill Sales Details</h2>
+        <form>
+            <label>Upload Your Picture (for verification):</label>
+            <input type="file" accept="image/*" required>
+            <label>Client Name:</label>
+            <input type="text" required>
+            <label>Date:</label>
+            <input type="date" required>
+            <label>Session:</label>
+            <select required>
+                <option disabled selected>Select Session</option>
+                <option>Morning</option>
+                <option>Evening</option>
+            </select>
+            <label>Status:</label>
+            <input type="text" required>
+            <label>Remarks:</label>
+            <textarea rows="4" required></textarea>
+            <button type="submit">Submit Sales Details</button>
+        </form>
+    </div>
+
+    <div class="logout">
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.content');
+            tabs.forEach(tab => tab.style.display = 'none');
+            document.getElementById(tabId).style.display = 'block';
+        }
+    </script>
 </body>
 </html>
