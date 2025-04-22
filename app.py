@@ -12,10 +12,12 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
 DATA_FILE = 'visit_logs.xlsx'
+ISSUE_FILE = 'issue_logs.xlsx'
+UPLOAD_FOLDER = 'uploads'
 
 # Initialize Excel file if not present
 if not os.path.exists(DATA_FILE):
-    df = pd.DataFrame(columns=['Employee Name', 'Client', 'Date', 'Session', 'Time', 'Status', 'Remarks'])
+    df = pd.DataFrame(columns=['Employee Name', 'Client', 'Date', 'Session', 'Time', 'Status', 'Remarks', 'Photo'])
     df.to_excel(DATA_FILE, index=False)
 
 # Load users securely from environment
@@ -73,6 +75,14 @@ def log_visit_form():
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
 
+    # Handle photo upload
+    photo = request.files.get('photo')
+    photo_filename = ''
+    if photo:
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        photo_filename = f"{session['user']}_{now.strftime('%Y%m%d%H%M%S')}.jpg"
+        photo.save(os.path.join(UPLOAD_FOLDER, photo_filename))
+
     new_entry = {
         'Employee Name': session['user'],
         'Client': request.form.get('client'),
@@ -80,7 +90,8 @@ def log_visit_form():
         'Session': request.form.get('session'),
         'Time': current_time,
         'Status': request.form.get('status'),
-        'Remarks': request.form.get('remarks')
+        'Remarks': request.form.get('remarks'),
+        'Photo': photo_filename
     }
 
     df = pd.read_excel(DATA_FILE)
@@ -89,49 +100,37 @@ def log_visit_form():
 
     return redirect(url_for('employee_dashboard'))
 
-@app.route('/log_visit', methods=['POST'])
-def log_visit():
+@app.route('/submit_issue', methods=['POST'])
+def submit_issue():
     if 'user' not in session or session.get('role') != 'employee':
-        return jsonify({'error': 'Unauthorized'}), 403
+        return redirect(url_for('login'))
 
-    data = request.json
-    new_entry = {
-        'Employee Name': session['user'],
-        'Client': data.get('client'),
-        'Date': data.get('date'),
-        'Status': data.get('status'),
-        'Remarks': data.get('remarks')
-    }
+    issue_text = request.form.get('issue_description')
+    issue_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    df = pd.read_excel(DATA_FILE)
-    df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
-    df.to_excel(DATA_FILE, index=False)
+    issue_df = pd.DataFrame([{
+        'Employee': session['user'],
+        'Issue': issue_text,
+        'Timestamp': issue_time
+    }])
 
-    return jsonify({'message': 'Visit logged successfully'})
+    if os.path.exists(ISSUE_FILE):
+        existing = pd.read_excel(ISSUE_FILE)
+        issue_df = pd.concat([existing, issue_df], ignore_index=True)
 
-@app.route('/update_visit', methods=['POST'])
-def update_visit():
+    issue_df.to_excel(ISSUE_FILE, index=False)
+
+    return redirect(url_for('employee_dashboard'))
+
+@app.route('/start_chat', methods=['POST'])
+def start_chat():
     if 'user' not in session or session.get('role') != 'employee':
-        return jsonify({'error': 'Unauthorized'}), 403
+        return redirect(url_for('login'))
 
-    data = request.json
-    required_fields = ['date', 'status']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({'error': f'Missing field: {field}'}), 400
+    query = request.form.get('chat_query')
+    ai_response = f"AI Response: You asked '{query}' — This is a dummy response."
 
-    if os.path.exists(DATA_FILE):
-        df = pd.read_excel(DATA_FILE)
-        mask = (df['Employee Name'] == session['user']) & (df['Date'] == data['date'])
-
-        if mask.any():
-            df.loc[mask, 'Status'] = data['status']
-            df.to_excel(DATA_FILE, index=False)
-            return jsonify({'message': 'Visit status updated successfully'})
-        else:
-            return jsonify({'message': 'No matching visit found'}), 404
-    else:
-        return jsonify({'message': 'No data file found'}), 404
+    return render_template('employee_dashboard.html', name=session['user'], ai_response=ai_response)
 
 # -------------------- ADMIN FUNCTIONALITY -------------------- #
 
