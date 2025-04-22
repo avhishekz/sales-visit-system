@@ -53,7 +53,6 @@
     }
     canvas {
       max-width: 100%;
-      height: 150px; /* Reduced height */
     }
     .calendar {
       display: grid;
@@ -93,6 +92,15 @@
     .nav-link:hover {
       color: #4e73df;
     }
+
+    /* New styles for Today's Goal and Your Score */
+    .goal-score-wrapper canvas {
+      max-width: 300px;
+      max-height: 300px;
+      width: 100%;
+      margin: 0 auto;
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -121,12 +129,12 @@
       </div>
 
       <div class="card">
-        <div class="row">
-          <div class="col-md-6">
+        <div class="row goal-score-wrapper">
+          <div class="col-md-6 text-center">
             <h6 class="card-title">Today's Goal</h6>
             <canvas id="goalChart"></canvas>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-6 text-center">
             <h6 class="card-title">Your Score</h6>
             <canvas id="scoreChart"></canvas>
           </div>
