@@ -1,119 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Employee Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <style>
-        body {
-            background: linear-gradient(to right, #e0f7fa, #ffffff);
-            padding: 20px;
-        }
-        .container {
-            margin-top: 30px;
-        }
-        h2 {
-            margin-bottom: 20px;
-        }
-        .card {
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-        .form-control, .form-select {
-            border-radius: 10px;
-        }
-        .btn {
-            border-radius: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Employee Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .dashboard-wrapper {
+      display: flex;
+      gap: 20px;
+    }
+    .sidebar {
+      width: 240px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+      backdrop-filter: blur(6px);
+    }
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: scale(1.01);
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    canvas {
+      max-width: 100%;
+      height: 180px;
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    .calendar div {
+      padding: 10px;
+      border-radius: 10px;
+      background: #e3ebff;
+    }
+    .calendar .today {
+      background: #4e73df;
+      color: white;
+    }
+    .rankings li {
+      margin: 5px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .growth-card {
+      background: linear-gradient(135deg, #38b6ff, #4e73df);
+      color: white;
+      text-align: center;
+      border-radius: 20px;
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
+    }
+    .growth-card h2 {
+      font-size: 2.2rem;
+    }
+    .nav-link {
+      color: #333;
+      font-weight: 500;
+    }
+    .nav-link:hover {
+      color: #4e73df;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2 class="text-center">Welcome, {{ name.title() }}</h2>
+  <div class="dashboard-wrapper">
+    <div class="sidebar">
+      <h5 class="mb-4"><i class="fas fa-chart-line me-2"></i>CRM Dashboard</h5>
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-home me-2"></i>Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-book me-2"></i>Courses</a></li>
+        <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-comments me-2"></i>Messages</a></li>
+        <li class="nav-item mt-3"><a href="{{ url_for('logout') }}" class="btn btn-danger w-100">Logout</a></li>
+      </ul>
+    </div>
 
-        <div class="text-end mb-3">
-            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    <div class="main-content">
+      <div class="card top-bar">
+        <div>
+          <h4>Welcome, {{ name.title() }}</h4>
+          <p class="text-muted">Here's an overview of your performance</p>
         </div>
+        <div class="card growth-card p-3">
+          <p class="mb-1">Growth</p>
+          <h2>+12.5%</h2>
+          <small>since last week</small>
+        </div>
+      </div>
 
-        <!-- Visit Log Form -->
-        <div class="card">
-            <h4>Log Sales Visit</h4>
+      <div class="card">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="card-title">Today's Goal</h6>
+            <canvas id="goalChart"></canvas>
+          </div>
+          <div class="col-md-6">
+            <h6 class="card-title">Your Score</h6>
+            <canvas id="scoreChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8">
+          <div class="card">
+            <h6 class="card-title">Log Sales Visit</h6>
             <form method="POST" action="{{ url_for('log_visit_form') }}" enctype="multipart/form-data">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Client Name</label>
-                        <input type="text" name="client" class="form-control" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Date</label>
-                        <input type="date" name="date" class="form-control" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Session</label>
-                        <select name="session" class="form-select" required>
-                            <option value="Morning">Morning</option>
-                            <option value="Evening">Evening</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select" required>
-                            <option value="Completed">Completed</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label">Remarks</label>
-                        <input type="text" name="remarks" class="form-control">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Upload Photo (Optional)</label>
-                        <input type="file" name="photo" class="form-control">
-                    </div>
-                    <div class="col-md-6 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Submit Visit</button>
-                    </div>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <input type="text" name="client" class="form-control" placeholder="Client Name" required>
                 </div>
-            </form>
-        </div>
-
-        <!-- Issue Submission Form -->
-        <div class="card">
-            <h4>Raise an Issue</h4>
-            <form method="POST" action="{{ url_for('submit_issue') }}">
-                <div class="row g-3">
-                    <div class="col-md-10">
-                        <textarea name="issue_description" class="form-control" rows="2" placeholder="Describe your issue..." required></textarea>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-warning w-100">Submit Issue</button>
-                    </div>
+                <div class="col-md-4">
+                  <input type="date" name="date" class="form-control" required>
                 </div>
+                <div class="col-md-4">
+                  <select name="session" class="form-select" required>
+                    <option value="Morning">Morning</option>
+                    <option value="Evening">Evening</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <select name="status" class="form-select" required>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div class="col-md-8">
+                  <input type="text" name="remarks" class="form-control" placeholder="Remarks">
+                </div>
+                <div class="col-md-6">
+                  <input type="file" name="photo" class="form-control">
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                  <button type="submit" class="btn btn-primary w-100">Submit Visit</button>
+                </div>
+              </div>
             </form>
-        </div>
+          </div>
 
-        <!-- AI Assistant Chat -->
-        <div class="card">
-            <h4>Chat with AI Assistant</h4>
+          <div class="card mt-3">
+            <h6 class="card-title">Chat with AI</h6>
             <form method="POST" action="{{ url_for('start_chat') }}">
-                <div class="row g-3">
-                    <div class="col-md-10">
-                        <input type="text" name="chat_query" class="form-control" placeholder="Ask something..." required>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-info w-100">Ask</button>
-                    </div>
+              <div class="row g-3">
+                <div class="col-md-10">
+                  <input type="text" name="chat_query" class="form-control" placeholder="Ask something..." required>
                 </div>
+                <div class="col-md-2">
+                  <button type="submit" class="btn btn-info w-100">Ask</button>
+                </div>
+              </div>
             </form>
             {% if ai_response %}
-                <div class="mt-3 alert alert-success">
-                    <strong>AI:</strong> {{ ai_response }}
-                </div>
+              <div class="mt-3 alert alert-success">
+                <strong>AI:</strong> {{ ai_response }}
+              </div>
             {% endif %}
+          </div>
         </div>
+
+        <div class="col-md-4">
+          <div class="card">
+            <h6 class="card-title">Calendar</h6>
+            <div class="calendar">
+              <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+              <div></div><div></div><div class="today">17</div>
+              <div>18</div><div>19</div><div>20</div><div>21</div>
+              <div>22</div><div>23</div><div>24</div><div>25</div>
+            </div>
+          </div>
+
+          <div class="card mt-3">
+            <h6 class="card-title">Employee Rankings</h6>
+            <ul class="list-unstyled rankings">
+              <li><span><strong>1.</strong> John Doe</span> <span class="text-success">95%</span></li>
+              <li><span><strong>2.</strong> Jane Smith</span> <span class="text-warning">90%</span></li>
+              <li><span><strong>3.</strong> Mark Lee</span> <span class="text-info">88%</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <script>
+    new Chart(document.getElementById('goalChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Completed', 'Remaining'],
+        datasets: [{
+          data: [85, 15],
+          backgroundColor: ['#f6c23e', '#eaeaea'],
+          borderWidth: 0
+        }]
+      },
+      options: { cutout: '70%', plugins: { legend: { display: false } } }
+    });
+
+    new Chart(document.getElementById('scoreChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Score', 'Remaining'],
+        datasets: [{
+          data: [50, 50],
+          backgroundColor: ['#4e73df', '#eaeaea'],
+          borderWidth: 0
+        }]
+      },
+      options: { cutout: '70%', plugins: { legend: { display: false } } }
+    });
+  </script>
 </body>
 </html>
